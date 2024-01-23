@@ -4,7 +4,7 @@ export class VolumeSlider {
 
     /**@private */
     percentPosition = 0;
-    
+
     /**
      * @param {HTMLDivElement} rangeSlider 
      * @param {VideoPlayer} videoPlayer
@@ -13,16 +13,19 @@ export class VolumeSlider {
     constructor(rangeSlider, videoPlayer) {
         /**@type {HTMLDivElement} */
         this.rangeSlider = rangeSlider;
+        this.buildRangeSlider();
 
         /**
          * @private
          * @type {VideoPlayer}
-         */
+        */
         this.videoPlayer = videoPlayer;
 
-        this.buildRangeSlider();
 
-        /**@type {HTMLButtonElement} */
+        /**
+         * @private
+         * @type {HTMLButtonElement} 
+         */
         this.thumbButton = rangeSlider.querySelector(".thumb");
         // this.thumbSize = this.thumbButton.getBoundingClientRect().width;
         this.thumbSize = 10;
@@ -30,6 +33,12 @@ export class VolumeSlider {
 
         /**@type {HTMLDivElement} */
         this.progressDone = rangeSlider.querySelector(".done");
+
+        /**
+         * @private
+         * @type {HTMLButtonElement}
+         */
+        this.volumeButton = document.querySelector(".volume_button");
 
         this.eventPointerMove = this.windowMove.bind(this);
         this.eventPointerUp = this.windowUp.bind(this);
@@ -57,6 +66,11 @@ export class VolumeSlider {
             window.addEventListener("mousemove", this.eventPointerMove);
             window.addEventListener("mouseup", this.eventPointerUp);
         });
+
+        this.volumeButton.addEventListener("click", () => {
+            this.volumeButton.classList.toggle("muted");
+            this.videoPlayer.toggleMute();
+        });
     }
 
     /**
@@ -65,12 +79,22 @@ export class VolumeSlider {
      */
     setThumbPosition(percent) {
         this.percentPosition = percent;
+
+        if (this.percentPosition >= 50) {
+            this.setHighVolumeIcon();
+        }
+        else if (this.percentPosition <= 50 && this.percentPosition > 0) {
+            this.setLowVolumeIcon();
+        } else {
+            this.setNoVolumeIcon();
+        }
+
         this.rangeSlider.ariaValueNow = `${Math.ceil(this.percentPosition)}%`;
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
         this.progressDone.style.width = `calc(${this.percentPosition}% + ${this.thumbSize / 2}px)`;
         this.videoPlayer.setVolume(this.percentPosition / 100);
     }
-    
+
 
     /**
      * @private
@@ -88,7 +112,7 @@ export class VolumeSlider {
         }
 
         this.setThumbPosition(this.percentPosition);
-        
+
         this.progressDone.style.width = `${this.percentPosition}%`;
 
         //ce qui est passé en paramètre est le currentTime
@@ -110,10 +134,28 @@ export class VolumeSlider {
     /**@private */
     windowUp() {
         this.isPointerDown = false;
-
-
         window.removeEventListener("mousemove", this.eventPointerMove);
         window.removeEventListener("mouseup", this.eventPointerUp);
-        // console.log(this.percentPosition);
+    }
+
+    /**@private */
+    setHighVolumeIcon() {
+        this.volumeButton.querySelector(".high").classList.remove("hidden");
+        this.volumeButton.querySelector(".low").classList.add("hidden");
+        this.volumeButton.querySelector(".none").classList.add("hidden");
+    }
+
+    /**@private */
+    setLowVolumeIcon() {
+        this.volumeButton.querySelector(".high").classList.add("hidden");
+        this.volumeButton.querySelector(".low").classList.remove("hidden");
+        this.volumeButton.querySelector(".none").classList.add("hidden");
+    }
+
+    /**@private */
+    setNoVolumeIcon() {
+        this.volumeButton.querySelector(".high").classList.add("hidden");
+        this.volumeButton.querySelector(".low").classList.add("hidden");
+        this.volumeButton.querySelector(".none").classList.remove("hidden");
     }
 }

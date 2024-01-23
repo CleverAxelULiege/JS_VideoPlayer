@@ -30,6 +30,7 @@ export class VideoPlayer{
          * @type {VolumeSlider}
          */
         this.volumeSlider = new VolumeSlider(document.querySelector(".progress_volume"), this);
+        //TODO IS_TOUCH_SCREEN DEFAULT TO 100
         this.volumeSlider.setThumbPosition(this.getVolume() * 100);
 
         this.initEventListeners();

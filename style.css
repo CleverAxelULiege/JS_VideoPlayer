@@ -54,6 +54,7 @@
 }
 
 .video_container .controls .buttons_container button {
+    position: relative;
     width: 44px;
     height: 44px;
     border-style: none;
@@ -71,6 +72,16 @@
     margin-right: 5px;
 }
 
+.video_container .controls .buttons_container button.volume_button.muted::after{
+    position: absolute;
+    content: "";
+    height: 100%;
+    width: 4px;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) rotate(45deg);
+    background-color: #c72323;
+}
 
 /****************BARRE DE PROGRESSION DANS LE TEMPS***************************/
 
