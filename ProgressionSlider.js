@@ -60,7 +60,7 @@ export class ProgressionSlider {
         this.rangeSlider.querySelector(".custom_range_slider").addEventListener("mousedown", (e) => {
             this.isPointerDown = true;
             this.wasPaused = this.videoPlayer.isPaused();
-            this.videoPlayer.pauseVideo(false);
+            this.videoPlayer.pause(false);
             this.calculateAndSetPercentPosition(e);
             window.addEventListener("mousemove", this.eventPointerMove);
             window.addEventListener("mouseup", this.eventPointerUp);
@@ -107,7 +107,7 @@ export class ProgressionSlider {
         this.progressDone.style.width = `${this.percentPosition}%`;
 
         //ce qui est passé en paramètre est le currentTime
-        this.videoPlayer.setVideoCurrentTime(this.videoPlayer.getVideoDuration() * (this.percentPosition/100));
+        this.videoPlayer.setVideoCurrentTime(this.videoPlayer.getDuration() * (this.percentPosition/100));
     }
 
     /**
@@ -127,10 +127,10 @@ export class ProgressionSlider {
         this.isPointerDown = false;
 
         if(this.percentPosition == 100){
-            this.videoPlayer.stopVideo();
+            this.videoPlayer.stop();
         }
         else if(!this.wasPaused){
-            this.videoPlayer.resumeVideo(false);
+            this.videoPlayer.resume(false);
         }
 
         window.removeEventListener("mousemove", this.eventPointerMove);

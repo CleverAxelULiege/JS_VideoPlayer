@@ -23,12 +23,14 @@ export class VideoPlayer{
          * @type {ProgressionSlider}
          */
         this.progressionSlider = new ProgressionSlider(document.querySelector(".progress_bar"), this);
+        this.progressionSlider.setThumbPosition(0);
 
         /**
          * @private
          * @type {VolumeSlider}
          */
         this.volumeSlider = new VolumeSlider(document.querySelector(".progress_volume"), this);
+        this.volumeSlider.setThumbPosition(this.getVolume() * 100);
 
         this.initEventListeners();
     }
@@ -36,15 +38,15 @@ export class VideoPlayer{
     /**@private */
     initEventListeners(){
         this.video.addEventListener("timeupdate", this.timeUpdate.bind(this));
-        this.playPauseButton.addEventListener("click", this.playOrResumeVideo.bind(this));
+        this.playPauseButton.addEventListener("click", this.playOrResume.bind(this));
     }
     
     /**@private */
-    playOrResumeVideo(){
+    playOrResume(){
         if(this.isPaused()){
-            this.resumeVideo();
+            this.resume();
         } else {
-            this.pauseVideo();
+            this.pause();
         }
     }
 
@@ -54,13 +56,13 @@ export class VideoPlayer{
             return;
         }
         if(this.video.buffered.length != 0){
-            this.progressionSlider.setBufferedLength((this.video.buffered.end(0) / this.getVideoDuration()) * 100);
+            this.progressionSlider.setBufferedLength((this.video.buffered.end(0) / this.getDuration()) * 100);
         }
-        this.progressionSlider.setThumbPosition((this.getVideoCurrentTime() / this.getVideoDuration()) * 100);
+        this.progressionSlider.setThumbPosition((this.getCurrentTime() / this.getDuration()) * 100);
 
     }
 
-    pauseVideo(shouldToggleIcons = true){
+    pause(shouldToggleIcons = true){
         this.video.pause();
 
         if(shouldToggleIcons){
@@ -68,7 +70,7 @@ export class VideoPlayer{
         }
     }
 
-    resumeVideo(shouldToggleIcons = true){
+    resume(shouldToggleIcons = true){
         this.video.play();
 
         if(shouldToggleIcons){
@@ -77,7 +79,7 @@ export class VideoPlayer{
 
     }
 
-    stopVideo(){
+    stop(){
         this.video.pause();
     }
 
@@ -87,7 +89,7 @@ export class VideoPlayer{
         this.playPauseButton.querySelector(".pause_icon").classList.toggle("hidden");
     }
 
-    getVideoDuration(){
+    getDuration(){
         if(this.video.duration == Infinity){
             window.alert("The video duration is set to INFINITY, this isn't normal, please contact the responsible person.");
             throw new Error("Video duration set to infinity");
@@ -95,7 +97,7 @@ export class VideoPlayer{
         return this.video.duration;
     }
 
-    getVideoCurrentTime(){
+    getCurrentTime(){
         return this.video.currentTime;
     }
 
@@ -103,8 +105,26 @@ export class VideoPlayer{
         return this.video.paused;
     }
 
+    getVolume(){
+        return this.video.volume;
+    }
+    
     /**
-     * @param {number} timeInSeconds 
+     * @param {number} volume 
+     */
+    setVolume(volume){
+        this.video.volume = volume;
+    }
+
+    toggleMute(){
+        this.video.muted = !this.video.muted;
+    }
+
+
+
+    /**
+     * @param {number} timeInSeconds
+     * peut être appelé par ProgressionSlider
      */
     setVideoCurrentTime(timeInSeconds){
         this.video.currentTime = timeInSeconds;

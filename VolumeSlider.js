@@ -7,7 +7,8 @@ export class VolumeSlider {
     
     /**
      * @param {HTMLDivElement} rangeSlider 
-     * @param {VideoPlayer} videoPlayer 
+     * @param {VideoPlayer} videoPlayer
+     * @param {number} volume  
      */
     constructor(rangeSlider, videoPlayer) {
         /**@type {HTMLDivElement} */
@@ -23,8 +24,8 @@ export class VolumeSlider {
 
         /**@type {HTMLButtonElement} */
         this.thumbButton = rangeSlider.querySelector(".thumb");
-        this.thumbSize = this.thumbButton.getBoundingClientRect().width;
-        console.log(this.thumbSize);
+        // this.thumbSize = this.thumbButton.getBoundingClientRect().width;
+        this.thumbSize = 10;
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
 
         /**@type {HTMLDivElement} */
@@ -67,6 +68,7 @@ export class VolumeSlider {
         this.rangeSlider.ariaValueNow = `${Math.ceil(this.percentPosition)}%`;
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
         this.progressDone.style.width = `calc(${this.percentPosition}% + ${this.thumbSize / 2}px)`;
+        this.videoPlayer.setVolume(this.percentPosition / 100);
     }
     
 
