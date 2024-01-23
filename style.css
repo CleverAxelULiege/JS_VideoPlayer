@@ -68,6 +68,12 @@
     background-color: transparent;
 }
 
+.video_container .controls .buttons_container .timestamp{
+    color: white;
+    padding: 0 5px;
+    font-size: 16px;
+}
+
 .video_container .controls .buttons_container button.play_button {
     margin-right: 5px;
 }

@@ -14,6 +14,12 @@ export class VideoPlayer{
 
         /**
          * @private
+         * @type {HTMLSpanElement}
+         */
+        this.timestamp = videoContainer.querySelector(".timestamp");
+
+        /**
+         * @private
          * @type {HTMLButtonElement}
          */
         this.playPauseButton = videoContainer.querySelector(".controls .play_button");
@@ -53,6 +59,7 @@ export class VideoPlayer{
 
     /**@private */
     timeUpdate(){
+        this.updateDisplayTimeStamp();
         if(this.progressionSlider.isPointerDown){
             return;
         }
@@ -61,6 +68,23 @@ export class VideoPlayer{
         }
         this.progressionSlider.setThumbPosition((this.getCurrentTime() / this.getDuration()) * 100);
 
+    }
+
+    /**@private */
+    updateDisplayTimeStamp(){
+        // console.log(this.formatTime(Math.round(this.getCurrentTime())));
+       this.timestamp.innerText = `${this.formatTime(Math.round(this.getCurrentTime()))} / ${this.formatTime(Math.round(this.getDuration()))}`;
+    }
+
+    /**
+     * @private
+     * @param {number} second 
+     */
+    formatTime(second){
+        let minute = Math.floor(second / 60);
+        second = second % 60;
+
+        return `${(minute < 10 ? "0" + minute.toString() : minute.toString())}:${(second < 10 ? "0" + second.toString() : second.toString())}`;
     }
 
     pause(shouldToggleIcons = true){
