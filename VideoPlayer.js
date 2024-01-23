@@ -2,6 +2,11 @@ import { ProgressionSlider } from "./ProgressionSlider.js";
 import { VolumeSlider } from "./VolumeSlider.js";
 
 export class VideoPlayer{
+
+    /**@private */
+    isVideoOver = false;
+
+
     /**
      * @param {HTMLDivElement} videoContainer
      */
@@ -40,21 +45,50 @@ export class VideoPlayer{
         this.volumeSlider.setThumbPosition(this.getVolume() * 100);
 
         this.initEventListeners();
+        this.updateDisplayTimeStamp();
     }
 
     /**@private */
     initEventListeners(){
         this.video.addEventListener("timeupdate", this.timeUpdate.bind(this));
         this.playPauseButton.addEventListener("click", this.playOrResume.bind(this));
+        this.video.addEventListener("ended", this.endVideo.bind(this));
+    }
+
+    /**@private */
+    endVideo(){
+        //video done
+        if(this.progressionSlider.getProgression() == 100){
+            this.isVideoOver = true;
+            this.playPauseButton.querySelector(".play_icon").classList.add("hidden");
+            this.playPauseButton.querySelector(".pause_icon").classList.add("hidden");
+            this.playPauseButton.querySelector(".replay_icon").classList.remove("hidden");
+        } else {
+            console.info("waiting for more data;");
+        }
     }
     
     /**@private */
     playOrResume(){
+        if(this.isVideoOver){
+            this.restartVideo();
+            return;
+        }
+
         if(this.isPaused()){
             this.resume();
         } else {
             this.pause();
         }
+    }
+
+    /**@private */
+    restartVideo(){
+        this.isVideoOver = false;
+        this.resume(false);
+        this.playPauseButton.querySelector(".play_icon").classList.add("hidden");
+        this.playPauseButton.querySelector(".pause_icon").classList.remove("hidden");
+        this.playPauseButton.querySelector(".replay_icon").classList.add("hidden");
     }
 
     /**@private */
@@ -72,7 +106,6 @@ export class VideoPlayer{
 
     /**@private */
     updateDisplayTimeStamp(){
-        // console.log(this.formatTime(Math.round(this.getCurrentTime())));
        this.timestamp.innerText = `${this.formatTime(Math.round(this.getCurrentTime()))} / ${this.formatTime(Math.round(this.getDuration()))}`;
     }
 
@@ -105,7 +138,7 @@ export class VideoPlayer{
     }
 
     stop(){
-        this.video.pause();
+        this.pause(false);
     }
 
     /**@private */

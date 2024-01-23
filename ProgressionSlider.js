@@ -54,6 +54,10 @@ export class ProgressionSlider {
             </div>
         `;
     }
+    
+    getProgression(){
+        return this.percentPosition;
+    }
 
     /**@private */
     initEventListeners() {
