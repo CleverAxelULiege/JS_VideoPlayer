@@ -21,7 +21,7 @@ let videoPlayer = new VideoPlayer(document.querySelector(".video_container"));
 //     //fired while video is playing continously
 // });
 
-fullscreen();
+// fullscreen();
 
 function fullscreen() {
     // full = document.getElementById("full");
