@@ -13,6 +13,12 @@ export class VideoPlayer{
     constructor(videoContainer){
         /**
          * @private
+         * @type {HTMLDivElement}
+         */
+        this.videoContainer = videoContainer;
+
+        /**
+         * @private
          * @type {HTMLVideoElement}
          */
         this.video = videoContainer.querySelector("video");
@@ -28,6 +34,12 @@ export class VideoPlayer{
          * @type {HTMLButtonElement}
          */
         this.playPauseButton = videoContainer.querySelector(".controls .play_button");
+
+        /**
+         * @private
+         * @type {HTMLButtonElement}
+         */
+        this.requestFullScreenButton = videoContainer.querySelector(".controls .full_screen_button");
 
         /**
          * @private
@@ -53,6 +65,10 @@ export class VideoPlayer{
         this.video.addEventListener("timeupdate", this.timeUpdate.bind(this));
         this.playPauseButton.addEventListener("click", this.playOrResume.bind(this));
         this.video.addEventListener("ended", this.endVideo.bind(this));
+        this.requestFullScreenButton.addEventListener("click", () => {
+            // this.videoContainer.webkitRequestFullscreen() || this.videoContainer.mozRequestFullScreen() ||  this.videoContainer.docEl.msRequestFullscreen() || this.videoContainer.requestFullscreen();
+
+        });
     }
 
     /**@private */

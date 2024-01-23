@@ -72,6 +72,9 @@
     color: white;
     padding: 0 5px;
     font-size: 16px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 .video_container .controls .buttons_container button.play_button {
@@ -87,6 +90,10 @@
     top: 50%;
     transform: translateX(-50%) translateY(-50%) rotate(45deg);
     background-color: #c72323;
+}
+.video_container .controls .buttons_container .full_screen_button{
+    margin-left: auto;
+    margin-right: 15px;
 }
 
 /****************BARRE DE PROGRESSION DANS LE TEMPS***************************/
