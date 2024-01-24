@@ -1,8 +1,12 @@
 import { ProgressionSlider } from "./ProgressionSlider.js";
 import { VolumeSlider } from "./VolumeSlider.js";
 
-/**Temps en millisecondes où les controls sont affichés pour les écrans tactiles */
-const TIME_CONTROLS_ARE_UP_TOUCH_SCREEN = 3500;
+/**
+ * Temps en millisecondes où les controls sont affichés.
+ * - Soit lorsqu'on clique dessus sur écran tactile
+ * - Soit lorsque la souris est sur la vidéo après un temps d'inactivité
+ */
+const TIME_CONTROLS_ARE_UP = 3500;
 
 export class VideoPlayer {
 
@@ -13,7 +17,6 @@ export class VideoPlayer {
     areControlsUp = false;
 
     idTimeoutControls = null;
-
 
     /**
      * @param {HTMLDivElement} videoContainer
@@ -85,10 +88,12 @@ export class VideoPlayer {
         this.video.addEventListener("ended", this.endVideo.bind(this));
         this.requestFullScreenButton.addEventListener("click", this.requestOrExitFullScreen.bind(this));
 
+        /**Simple function pour set les ARIA */
         this.videoContainer.addEventListener("mouseenter", () => {
             this.controls.setAttribute("aria-hidden", "false");
         });
 
+        /**Simple function pour set les ARIA */
         this.videoContainer.addEventListener("mouseleave", () => {
             this.controls.setAttribute("aria-hidden", "true");
             this.controls.style.pointerEvents = "";
@@ -96,10 +101,24 @@ export class VideoPlayer {
             this.areControlsUp = false;
         });
 
-        this.videoContainer.addEventListener("click", (e) => {
+        /**Après un temps d'inactivité le curseur sera caché ainsi que les controls */
+        this.videoContainer.addEventListener("mousemove", () => {
             clearTimeout(this.idTimeoutControls);
+            this.videoContainer.style.cursor = "";
+            this.controls.style.pointerEvents = "";
+            this.controls.style.opacity = "";
+            this.controls.setAttribute("aria-hidden", "false");
+
+            this.idTimeoutControls = setTimeout(() => {
+                this.videoContainer.style.cursor = "none";
+                this.closeControls();
+            }, TIME_CONTROLS_ARE_UP)
+        });
+
+        this.videoContainer.addEventListener("click", (e) => {
             if (this.isTouchScreen() && e.target == this.video) {
-                this.toggleControls();
+                clearTimeout(this.idTimeoutControls);
+                this.toggleControlsMobile();
             }
         });
 
@@ -107,7 +126,7 @@ export class VideoPlayer {
             this.updateDisplayTimeStamp();
         });
 
-        //obligé de faire une boucle car même avec l'event loaded il ne me retourne rien
+        //obligé de faire une boucle car même avec l'event loaded il ne me retourne rien même pas le DOM Element
         while(this.timestamp.innerHTML == ""){
             this.updateDisplayTimeStamp();
         }
@@ -116,33 +135,41 @@ export class VideoPlayer {
     /**@private */
     startTimeoutToggleControls() {
         this.idTimeoutControls = setTimeout(() => {
-            this.toggleControls();
-        }, TIME_CONTROLS_ARE_UP_TOUCH_SCREEN);
+            this.toggleControlsMobile();
+        }, TIME_CONTROLS_ARE_UP);
     }
 
     /**Utilisé par ProgressionSlider pour les écrans tactiles lorsqu'on a fini de déplacer le "thumb" dans la barre du temps */
     startTimeoutCloseControls() {
         this.idTimeoutControls = setTimeout(() => {
-            this.controls.style.pointerEvents = "none";
-            this.controls.style.opacity = "0";
-            this.controls.setAttribute("aria-hidden", "true");
-        }, TIME_CONTROLS_ARE_UP_TOUCH_SCREEN);
+            this.closeControls();
+        }, TIME_CONTROLS_ARE_UP);
+    }
+
+    /**@private */
+    closeControls(){
+        this.areControlsUp = false;
+        this.controls.style.pointerEvents = "none";
+        this.controls.style.opacity = "0";
+        this.controls.setAttribute("aria-hidden", "true");
+    }
+
+    /**@private */
+    openControls(){
+        this.areControlsUp = true;
+        this.controls.style.pointerEvents = "all";
+        this.controls.style.opacity = "1";
+        this.controls.setAttribute("aria-hidden", "false");
     }
     
-
-    toggleControls() {
+    /**@private */
+    toggleControlsMobile() {
         if (this.areControlsUp) {
-            this.controls.style.pointerEvents = "none";
-            this.controls.style.opacity = "0";
-            this.controls.setAttribute("aria-hidden", "true");
+            this.closeControls();
         } else {
             this.startTimeoutToggleControls();
-            this.controls.style.pointerEvents = "all";
-            this.controls.style.opacity = "1";
-            this.controls.setAttribute("aria-hidden", "false");
+            this.openControls();
         }
-
-        this.areControlsUp = !this.areControlsUp;
     }
 
     /**@private */
@@ -196,7 +223,11 @@ export class VideoPlayer {
 
     /**@private */
     updateDisplayTimeStamp() {
-        this.timestamp.innerHTML = `${this.formatTime(Math.round(this.getCurrentTime()))} / ${this.formatTime(Math.round(this.getDuration()))}`;
+        try{
+            this.timestamp.innerHTML = `${this.formatTime(Math.round(this.getCurrentTime()))} / ${this.formatTime(Math.round(this.getDuration()))}`;
+        } catch(e){
+            this.timestamp.innerHTML = "error";
+        }
     }
 
     /**
@@ -224,7 +255,7 @@ export class VideoPlayer {
             }
 
             if (this.isTouchScreen()) {
-                this.toggleControls();
+                this.toggleControlsMobile();
             }
 
         } else {
