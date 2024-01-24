@@ -52,11 +52,12 @@
     animation-name: play_pause_fade_in;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
-    animation-duration: 1.2s;
+    animation-duration: 750ms;
 }
 
 .video_container .pulse_play,
 .video_container .pulse_pause{
+    pointer-events: none;
     position: absolute;
     display: flex;
     justify-content: center;
@@ -279,7 +280,7 @@
     }
 
     75%{
-        opacity: 0.5;
+        opacity: 0.4;
     }
     
     100%{

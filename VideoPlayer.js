@@ -19,6 +19,9 @@ export class VideoPlayer {
     /**@private */
     areControlsUp = false;
 
+    /**@private */
+    didControlsJustShowedUp = false;
+
     idTimeoutControls = null;
 
     /**
@@ -38,7 +41,7 @@ export class VideoPlayer {
         this.video = videoContainer.querySelector("video");
 
         //Si ne supporte pas l'API fullscreen fallback sur le video player de base.
-        if(!this.supportFullscreen()){
+        if (!this.supportFullscreen()) {
             this.JSsupportAspectRatio();
             this.video.setAttribute("controls", "");
             return;
@@ -116,6 +119,7 @@ export class VideoPlayer {
 
         this.videoContainer.addEventListener("mousemove", this.hideCursorAndControlsAfterInactivity.bind(this));
         this.videoContainer.addEventListener("click", this.toggleControlsTouchScreen.bind(this));
+        this.videoContainer.addEventListener("click", this.playOrResumeViaScreen.bind(this));
 
         this.video.addEventListener("loadedmetadata", () => {
             this.updateDisplayTimeStamp();
@@ -124,7 +128,7 @@ export class VideoPlayer {
         this.JSsupportAspectRatio();
 
 
-        //obligé de faire une boucle car même avec l'event loaded il ne me retourne rien même pas le DOM Element
+        //obligé de faire une boucle car même avec l'event loaded il ne me retourne rien même pas le DOM Element pour afficher le temps écoulé à côté du volume
         while (this.timestamp.innerHTML == "") {
             this.updateDisplayTimeStamp();
         }
@@ -148,6 +152,7 @@ export class VideoPlayer {
         this.controls.classList.add("active");
         this.controls.setAttribute("aria-hidden", "false");
         this.areControlsUp = true;
+        this.didControlsJustShowedUp = true;
     }
 
     /**@private */
@@ -155,6 +160,7 @@ export class VideoPlayer {
         this.controls.classList.remove("active");
         this.controls.setAttribute("aria-hidden", "true");
         this.areControlsUp = false;
+        this.didControlsJustShowedUp = false;
     }
 
     /**
@@ -175,6 +181,37 @@ export class VideoPlayer {
         else if (this.areControlsUp && e.target == this.video) {
             this.closeControlsTouchScreen();
         }
+    }
+
+    /**
+     * @private
+     * @param {Event} e 
+     */
+    playOrResumeViaScreen(e) {
+        if (e.target != this.video || this.isTouchScreen()) {
+            return;
+        }
+
+        let pulsePlay = this.videoContainer.querySelector(".pulse_play");
+        let pulsePause = this.videoContainer.querySelector(".pulse_pause");
+
+        if (this.isPaused()) {
+            pulsePlay.classList.remove("hidden");
+            pulsePlay.classList.add("animate");
+            pulsePlay.addEventListener("animationend", () => {
+                pulsePlay.classList.add("hidden");
+                pulsePlay.classList.remove("animate");
+            }, { once: true });
+        } else {
+            pulsePause.classList.remove("hidden");
+            pulsePause.classList.add("animate");
+            pulsePause.addEventListener("animationend", () => {
+                pulsePause.classList.add("hidden");
+                pulsePause.classList.remove("animate");
+            }, { once: true });
+        }
+        this.playOrResume();
+
     }
 
     /**
@@ -230,15 +267,15 @@ export class VideoPlayer {
     }
 
     /**@private */
-    retrieveVideoPlayerPreference(){
+    retrieveVideoPlayerPreference() {
         let videoPlayerPreference = JSON.parse(localStorage.getItem("video_player_preference"));
 
-        if(!videoPlayerPreference){
+        if (!videoPlayerPreference) {
             this.volumeSlider.setThumbPosition(100);
             return;
         }
-        
-        if(videoPlayerPreference.isMuted){
+
+        if (videoPlayerPreference.isMuted) {
             this.toggleMute();
         }
 
@@ -249,7 +286,7 @@ export class VideoPlayer {
         }
     }
 
-    saveVideoPlayerPreference(){
+    saveVideoPlayerPreference() {
         let preference = {
             isMuted: this.video.muted,
             volume: this.volumeSlider.getVolume()
@@ -262,7 +299,7 @@ export class VideoPlayer {
      * @private
      * Ajoute un support en JS si la propriété aspect-ratio en CSS n'existe pas
      */
-    JSsupportAspectRatio(){
+    JSsupportAspectRatio() {
         if (!CSS.supports("aspect-ratio", "16/9")) {
             console.info("Aspect-ratio support via JS");
             window.addEventListener("resize", () => {
@@ -435,14 +472,14 @@ export class VideoPlayer {
     }
 
     /**@private */
-    buildVideoPlayer(){
+    buildVideoPlayer() {
         console.warn("not building the player");
         return;
         let div = document.createElement("div");
         div.setAttribute("aria-hidden", "true");
         div.classList.add("controls");
-        div.innerHTML += 
-        `
+        div.innerHTML +=
+            `
             <div class="progress_bar" role="slider" aria-valuemin="0%" aria-valuemax="100%"></div>
 
             <div class="buttons_container">
