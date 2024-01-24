@@ -63,9 +63,13 @@ export class ProgressionSlider {
     initEventListeners() {
         if(this.videoPlayer.isTouchScreen()){
             this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
+                clearTimeout(this.videoPlayer.idTimeoutControls);
                 this.isPointerDown = true;
                 this.wasPaused = this.videoPlayer.isPaused();
                 this.videoPlayer.pause(false);
+                if(this.videoPlayer.isVideoOver){
+                    this.videoPlayer.restartVideo();
+                }
                 this.calculateAndSetPercentPosition(e);
                 window.addEventListener("touchmove", this.eventPointerMove);
                 window.addEventListener("touchend", this.eventPointerUp);
@@ -75,6 +79,9 @@ export class ProgressionSlider {
                 this.isPointerDown = true;
                 this.wasPaused = this.videoPlayer.isPaused();
                 this.videoPlayer.pause(false);
+                if(this.videoPlayer.isVideoOver){
+                    this.videoPlayer.restartVideo();
+                }
                 this.calculateAndSetPercentPosition(e);
                 window.addEventListener("mousemove", this.eventPointerMove);
                 window.addEventListener("mouseup", this.eventPointerUp);
@@ -131,11 +138,13 @@ export class ProgressionSlider {
      * @param {Event} e 
      */
     windowMove(e) {
-
         if (!this.isPointerDown) {
             return;
         }
         clearTimeout(this.videoPlayer.idTimeoutControls);
+        if(this.videoPlayer.isVideoOver){
+            this.videoPlayer.restartVideo();
+        }
         this.calculateAndSetPercentPosition(e);
     }
 

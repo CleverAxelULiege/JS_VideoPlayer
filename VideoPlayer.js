@@ -10,7 +10,6 @@ const TIME_CONTROLS_ARE_UP = 3500;
 
 export class VideoPlayer {
 
-    /**@private */
     isVideoOver = false;
 
     /**@private */
@@ -22,6 +21,7 @@ export class VideoPlayer {
      * @param {HTMLDivElement} videoContainer
      */
     constructor(videoContainer) {
+        
         /**
          * @private
          * @type {HTMLDivElement}
@@ -78,8 +78,6 @@ export class VideoPlayer {
         }
 
         this.initEventListeners();
-
-
     }
 
     /**@private */
@@ -201,7 +199,9 @@ export class VideoPlayer {
         }
     }
 
-    /**@private */
+    /**
+     * peut-être aussi utilisé par ProgressionSlider au cas où remonterait la ligne du temps alors que la vidéo est finie
+     */
     restartVideo() {
         this.isVideoOver = false;
         this.resume(false);
@@ -271,6 +271,21 @@ export class VideoPlayer {
                 document.msExitFullscreen();
             }
         }
+    }
+
+    /**@private */
+    supportFullscreen(){
+        if (this.videoContainer.requestFullscreen) {
+            return true;
+        } else if (this.videoContainer.mozRequestFullScreen) {
+            return true;
+        } else if (this.videoContainer.webkitRequestFullscreen) {
+            return true;
+        } else if (this.videoContainer.msRequestFullscreen) {
+            return true;
+        }
+
+        return false;
     }
 
     pause(shouldToggleIcons = true) {
