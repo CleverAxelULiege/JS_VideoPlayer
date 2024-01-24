@@ -1,10 +1,18 @@
 import { ProgressionSlider } from "./ProgressionSlider.js";
 import { VolumeSlider } from "./VolumeSlider.js";
 
+/**Temps en millisecondes où les controls sont affichés pour les écrans tactiles */
+const TIME_CONTROLS_ARE_UP_TOUCH_SCREEN = 3500;
+
 export class VideoPlayer{
 
     /**@private */
     isVideoOver = false;
+
+    /**@private */
+    areControlsUp = false;
+
+    idTimeoutControls = null;
 
 
     /**
@@ -31,6 +39,12 @@ export class VideoPlayer{
 
         /**
          * @private
+         * @type {HTMLDivElement}
+         */
+        this.controls = videoContainer.querySelector(".controls");
+
+        /**
+         * @private
          * @type {HTMLButtonElement}
          */
         this.playPauseButton = videoContainer.querySelector(".controls .play_button");
@@ -45,16 +59,20 @@ export class VideoPlayer{
          * @private
          * @type {ProgressionSlider}
          */
-        this.progressionSlider = new ProgressionSlider(document.querySelector(".progress_bar"), this);
+        this.progressionSlider = new ProgressionSlider(videoContainer.querySelector(".progress_bar"), this);
         this.progressionSlider.setThumbPosition(0);
 
         /**
          * @private
          * @type {VolumeSlider}
          */
-        this.volumeSlider = new VolumeSlider(document.querySelector(".progress_volume"), this);
-        //TODO IS_TOUCH_SCREEN DEFAULT TO 100
-        this.volumeSlider.setThumbPosition(this.getVolume() * 100);
+        this.volumeSlider = new VolumeSlider(videoContainer.querySelector(".progress_volume"), this);
+
+        if(this.isTouchScreen()){
+            this.volumeSlider.setThumbPosition(100);
+        } else {
+            this.volumeSlider.setThumbPosition(this.getVolume() * 100);
+        }
 
         this.initEventListeners();
         this.updateDisplayTimeStamp();
@@ -65,9 +83,46 @@ export class VideoPlayer{
         this.video.addEventListener("timeupdate", this.timeUpdate.bind(this));
         this.playPauseButton.addEventListener("click", this.playOrResume.bind(this));
         this.video.addEventListener("ended", this.endVideo.bind(this));
-        this.requestFullScreenButton.addEventListener("click", () => {
-            this.requestOrExitFullScreen();
+        this.requestFullScreenButton.addEventListener("click", this.requestOrExitFullScreen.bind(this));
+
+        this.videoContainer.addEventListener("mouseenter", () => {
+            this.controls.setAttribute("aria-hidden", "false");
         });
+
+        this.videoContainer.addEventListener("mouseleave", () => {
+            this.controls.setAttribute("aria-hidden", "true");
+            this.controls.style.pointerEvents = "";
+            this.controls.style.opacity = "";
+            this.areControlsUp = false;
+        });
+
+        this.videoContainer.addEventListener("click", (e) => {
+            clearTimeout(this.idTimeoutControls);
+            if(this.isTouchScreen() && e.target == this.video){
+                this.toggleControls();
+            }
+        });
+    }
+
+    startTimeoutControls(){
+        this.idTimeoutControls = setTimeout(() => {
+            this.toggleControls();
+        }, TIME_CONTROLS_ARE_UP_TOUCH_SCREEN);
+    }
+
+    toggleControls(){
+        if(this.areControlsUp){
+            this.controls.style.pointerEvents = "none";
+            this.controls.style.opacity = "0";
+            this.controls.setAttribute("aria-hidden", "true");
+        } else {            
+            this.startTimeoutControls();
+            this.controls.style.pointerEvents = "all";
+            this.controls.style.opacity = "1";
+            this.controls.setAttribute("aria-hidden", "false");
+        }
+
+        this.areControlsUp = !this.areControlsUp;
     }
 
     /**@private */
@@ -147,6 +202,11 @@ export class VideoPlayer{
             } else if (this.videoContainer.msRequestFullscreen) {
                 this.videoContainer.msRequestFullscreen();
             }
+
+            if(this.isTouchScreen()){
+                this.toggleControls();
+            }
+
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -226,5 +286,10 @@ export class VideoPlayer{
      */
     setVideoCurrentTime(timeInSeconds){
         this.video.currentTime = timeInSeconds;
+    }
+
+    isTouchScreen(){
+        return (('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0));
     }
 }

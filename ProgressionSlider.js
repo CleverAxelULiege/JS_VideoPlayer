@@ -61,14 +61,37 @@ export class ProgressionSlider {
 
     /**@private */
     initEventListeners() {
-        this.rangeSlider.querySelector(".custom_range_slider").addEventListener("mousedown", (e) => {
-            this.isPointerDown = true;
-            this.wasPaused = this.videoPlayer.isPaused();
-            this.videoPlayer.pause(false);
-            this.calculateAndSetPercentPosition(e);
-            window.addEventListener("mousemove", this.eventPointerMove);
-            window.addEventListener("mouseup", this.eventPointerUp);
-        });
+        if(this.videoPlayer.isTouchScreen()){
+            this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
+                this.isPointerDown = true;
+                this.wasPaused = this.videoPlayer.isPaused();
+                this.videoPlayer.pause(false);
+                this.calculateAndSetPercentPosition(e);
+                window.addEventListener("touchmove", this.eventPointerMove);
+                window.addEventListener("touchend", this.eventPointerUp);
+            });
+        }else{
+            this.rangeSlider.querySelector(".custom_range_slider").addEventListener("mousedown", (e) => {
+                this.isPointerDown = true;
+                this.wasPaused = this.videoPlayer.isPaused();
+                this.videoPlayer.pause(false);
+                this.calculateAndSetPercentPosition(e);
+                window.addEventListener("mousemove", this.eventPointerMove);
+                window.addEventListener("mouseup", this.eventPointerUp);
+            });
+        }
+        // this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
+        //     console.log(e.clientX);
+            // window.addEventListener("touchmove", (e) => {
+            //     console.log(e.changedTouches);
+            // })
+        //     // this.isPointerDown = true;
+        //     // this.wasPaused = this.videoPlayer.isPaused();
+        //     // this.videoPlayer.pause(false);
+        //     // this.calculateAndSetPercentPosition(e);
+        //     // window.addEventListener("touchmove", this.eventPointerMove);
+        //     // window.addEventListener("touchend", this.eventPointerUp);
+        // });
     }
 
     /**
@@ -93,10 +116,15 @@ export class ProgressionSlider {
 
     /**
      * @private
-     * @param {Event} e 
+     * @param {Event|TouchEvent} e 
      */
     calculateAndSetPercentPosition(e) {
-        let relativePositionOnSlider = e.clientX - this.rangeSlider.querySelector(".custom_range_slider").getBoundingClientRect().left;
+        let xPosition = this.videoPlayer.isTouchScreen() ? e.changedTouches[0].clientX : e.clientX;
+        // if(this.videoPlayer.isTouchScreen()){
+        //     console.log(e.changedTouches);
+        //     return;
+        // }
+        let relativePositionOnSlider = xPosition - this.rangeSlider.querySelector(".custom_range_slider").getBoundingClientRect().left;
         this.percentPosition = (relativePositionOnSlider / this.rangeSlider.querySelector(".custom_range_slider").getBoundingClientRect().width) * 100;
 
         if (this.percentPosition < 0) {
@@ -109,7 +137,6 @@ export class ProgressionSlider {
         this.setThumbPosition(this.percentPosition);
         
         this.progressDone.style.width = `${this.percentPosition}%`;
-
         //ce qui est passé en paramètre est le currentTime
         this.videoPlayer.setVideoCurrentTime(this.videoPlayer.getDuration() * (this.percentPosition/100));
     }
@@ -122,7 +149,7 @@ export class ProgressionSlider {
         if (!this.isPointerDown) {
             return;
         }
-
+        clearTimeout(this.videoPlayer.idTimeoutControls);
         this.calculateAndSetPercentPosition(e);
     }
 
@@ -136,9 +163,10 @@ export class ProgressionSlider {
         else if(!this.wasPaused){
             this.videoPlayer.resume(false);
         }
-
+        this.videoPlayer.startTimeoutControls();
         window.removeEventListener("mousemove", this.eventPointerMove);
         window.removeEventListener("mouseup", this.eventPointerUp);
-        // console.log(this.percentPosition);
+        window.removeEventListener("touchmove", this.eventPointerMove);
+        window.removeEventListener("touchend", this.eventPointerUp);
     }
 }
