@@ -99,7 +99,7 @@ export class ProgressionSlider {
      */
     setThumbPosition(percent) {
         this.percentPosition = percent;
-        this.rangeSlider.ariaValueNow = `${Math.ceil(this.percentPosition)}%`;
+        this.rangeSlider.setAttribute("aria-valuenow", `${Math.ceil(this.percentPosition)}%`);
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
         this.progressDone.style.width = `calc(${this.percentPosition}% + ${this.thumbSize / 2}px)`;
         
