@@ -99,31 +99,8 @@ export class VideoPlayer {
             this.areControlsUp = false;
         });
 
-        /**Après un temps d'inactivité le curseur sera caché ainsi que les controls */
-        this.videoContainer.addEventListener("mousemove", () => {
-            if (this.isTouchScreen()) {
-                return;
-            }
-            clearTimeout(this.idTimeoutControls);
-            this.videoContainer.style.cursor = "";
-            this.controls.classList.remove("hide");
-            this.controls.setAttribute("aria-hidden", "false");
-            
-            this.idTimeoutControls = setTimeout(() => {
-                this.videoContainer.style.cursor = "none";
-                this.controls.classList.add("hide");
-                this.controls.setAttribute("aria-hidden", "true");
-            }, TIME_CONTROLS_ARE_UP)
-        });
-
-
-        this.videoContainer.addEventListener("click", (e) => {
-            if(!this.isTouchScreen()){
-                return;
-            }
-            clearTimeout(this.idTimeoutControls);
-            this.toggleControlsTouchScreen(e.target);
-        });
+        this.videoContainer.addEventListener("mousemove", this.hideCursorAndControlsAfterInactivity.bind(this));
+        this.videoContainer.addEventListener("click", this.toggleControlsTouchScreen.bind(this));
 
         this.video.addEventListener("loadedmetadata", () => {
             this.updateDisplayTimeStamp();
@@ -149,7 +126,6 @@ export class VideoPlayer {
         this.controls.classList.add("active");
         this.controls.setAttribute("aria-hidden", "false");
         this.areControlsUp = true;
-        this.startTimeoutCloseControlsTouchScreen();
     }
 
     /**@private */
@@ -161,15 +137,43 @@ export class VideoPlayer {
 
     /**
      * @private
-     * @param {EventTarget|null} targetElement 
+     * @param {Event} e 
      */
-    toggleControlsTouchScreen(targetElement) {
+    toggleControlsTouchScreen(e) {
+        if(!this.isTouchScreen()){
+            return;
+        }
+
+        clearTimeout(this.idTimeoutControls);
+        
         if(!this.areControlsUp){
             this.openControlsTouchScreen();
+            this.startTimeoutCloseControlsTouchScreen();
         } 
-        else if(this.areControlsUp && targetElement == this.video){
+        else if(this.areControlsUp && e.target == this.video){
             this.closeControlsTouchScreen();
         }
+    }
+
+    /**
+     * @private
+     * après un temps d'inactivité le curseur et les controls seront cachés MARCHE UNIQUEMENT SUR DES APPAREILS NON TACTILES
+     * @see toggleControlsTouchScreen -> pour voir comment cacher les controls sur les appareils tactiles
+     */
+    hideCursorAndControlsAfterInactivity(){
+        if (this.isTouchScreen()) {
+            return;
+        }
+        clearTimeout(this.idTimeoutControls);
+        this.videoContainer.style.cursor = "";
+        this.controls.classList.remove("hide");
+        this.controls.setAttribute("aria-hidden", "false");
+        
+        this.idTimeoutControls = setTimeout(() => {
+            this.videoContainer.style.cursor = "none";
+            this.controls.classList.add("hide");
+            this.controls.setAttribute("aria-hidden", "true");
+        }, TIME_CONTROLS_ARE_UP)
     }
 
     /**@private */
@@ -180,6 +184,9 @@ export class VideoPlayer {
             this.playPauseButton.querySelector(".play_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".pause_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".replay_icon").classList.remove("hidden");
+            if(this.isTouchScreen()){
+                this.startTimeoutCloseControlsTouchScreen();
+            }
         } else {
             console.info("waiting for more data;");
         }
