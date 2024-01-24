@@ -80,18 +80,6 @@ export class ProgressionSlider {
                 window.addEventListener("mouseup", this.eventPointerUp);
             });
         }
-        // this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
-        //     console.log(e.clientX);
-            // window.addEventListener("touchmove", (e) => {
-            //     console.log(e.changedTouches);
-            // })
-        //     // this.isPointerDown = true;
-        //     // this.wasPaused = this.videoPlayer.isPaused();
-        //     // this.videoPlayer.pause(false);
-        //     // this.calculateAndSetPercentPosition(e);
-        //     // window.addEventListener("touchmove", this.eventPointerMove);
-        //     // window.addEventListener("touchend", this.eventPointerUp);
-        // });
     }
 
     /**
@@ -120,10 +108,7 @@ export class ProgressionSlider {
      */
     calculateAndSetPercentPosition(e) {
         let xPosition = this.videoPlayer.isTouchScreen() ? e.changedTouches[0].clientX : e.clientX;
-        // if(this.videoPlayer.isTouchScreen()){
-        //     console.log(e.changedTouches);
-        //     return;
-        // }
+
         let relativePositionOnSlider = xPosition - this.rangeSlider.querySelector(".custom_range_slider").getBoundingClientRect().left;
         this.percentPosition = (relativePositionOnSlider / this.rangeSlider.querySelector(".custom_range_slider").getBoundingClientRect().width) * 100;
 
@@ -146,6 +131,7 @@ export class ProgressionSlider {
      * @param {Event} e 
      */
     windowMove(e) {
+
         if (!this.isPointerDown) {
             return;
         }
@@ -163,7 +149,11 @@ export class ProgressionSlider {
         else if(!this.wasPaused){
             this.videoPlayer.resume(false);
         }
-        this.videoPlayer.startTimeoutControls();
+
+        if(this.videoPlayer.isTouchScreen()){
+            this.videoPlayer.startTimeoutCloseControls();
+        }
+        
         window.removeEventListener("mousemove", this.eventPointerMove);
         window.removeEventListener("mouseup", this.eventPointerUp);
         window.removeEventListener("touchmove", this.eventPointerMove);
