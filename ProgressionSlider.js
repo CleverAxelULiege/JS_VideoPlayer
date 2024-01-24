@@ -151,9 +151,9 @@ export class ProgressionSlider {
         }
 
         if(this.videoPlayer.isTouchScreen()){
-            this.videoPlayer.startTimeoutCloseControls();
+            this.videoPlayer.startTimeoutCloseControlsTouchScreen();
         }
-        
+
         window.removeEventListener("mousemove", this.eventPointerMove);
         window.removeEventListener("mouseup", this.eventPointerUp);
         window.removeEventListener("touchmove", this.eventPointerMove);
