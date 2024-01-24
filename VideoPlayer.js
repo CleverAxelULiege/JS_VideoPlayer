@@ -1,6 +1,10 @@
 import { ProgressionSlider } from "./ProgressionSlider.js";
 import { VolumeSlider } from "./VolumeSlider.js";
 
+//TODO FIX THE BUFFER ~ not a priority
+//TODO IMPLEMENTS canplay event
+//TODO IMPLEMENTS waiting event
+
 /**
  * Temps en millisecondes où les controls peuvent être affichés.
  * - Soit lorsqu'on clique dessus sur écran tactile
@@ -432,6 +436,8 @@ export class VideoPlayer {
 
     /**@private */
     buildVideoPlayer(){
+        console.warn("not building the player");
+        return;
         let div = document.createElement("div");
         div.setAttribute("aria-hidden", "true");
         div.classList.add("controls");
