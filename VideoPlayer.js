@@ -106,6 +106,13 @@ export class VideoPlayer {
             this.updateDisplayTimeStamp();
         });
 
+        if(!CSS.supports("aspect-ratio", "16/9")){
+            console.info("Aspect-ratio support via JS");
+            window.addEventListener("resize", () => {
+                this.videoContainer.style.height = (this.videoContainer.getBoundingClientRect().width / 16) * 9;
+            });
+        }
+
         //obligé de faire une boucle car même avec l'event loaded il ne me retourne rien même pas le DOM Element
         while (this.timestamp.innerHTML == "") {
             this.updateDisplayTimeStamp();
@@ -184,6 +191,7 @@ export class VideoPlayer {
             this.playPauseButton.querySelector(".play_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".pause_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".replay_icon").classList.remove("hidden");
+
             if(this.isTouchScreen()){
                 this.startTimeoutCloseControlsTouchScreen();
             }

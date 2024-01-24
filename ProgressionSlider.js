@@ -64,12 +64,18 @@ export class ProgressionSlider {
         if(this.videoPlayer.isTouchScreen()){
             this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
                 clearTimeout(this.videoPlayer.idTimeoutControls);
+                if(this.videoPlayer.isTouchScreen()){
+                    this.videoPlayer.startTimeoutCloseControlsTouchScreen();
+                }
+
                 this.isPointerDown = true;
                 this.wasPaused = this.videoPlayer.isPaused();
                 this.videoPlayer.pause(false);
+
                 if(this.videoPlayer.isVideoOver){
                     this.videoPlayer.restartVideo();
                 }
+
                 this.calculateAndSetPercentPosition(e);
                 window.addEventListener("touchmove", this.eventPointerMove);
                 window.addEventListener("touchend", this.eventPointerUp);
@@ -142,6 +148,9 @@ export class ProgressionSlider {
             return;
         }
         clearTimeout(this.videoPlayer.idTimeoutControls);
+        if(this.videoPlayer.isTouchScreen()){
+            this.videoPlayer.startTimeoutCloseControlsTouchScreen();
+        }
         if(this.videoPlayer.isVideoOver){
             this.videoPlayer.restartVideo();
         }

@@ -14,9 +14,14 @@
     margin: 30px;
     position: relative;
     max-width: 854px;
-    aspect-ratio: 16/9;
     overflow: hidden;
     border-radius: 10px;
+}
+
+@supports (aspect-ratio: 16/9){
+    .video_container{
+        aspect-ratio: 16/9;
+    }
 }
 
 .video_container video {
