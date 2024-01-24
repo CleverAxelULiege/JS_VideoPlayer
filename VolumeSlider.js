@@ -38,7 +38,7 @@ export class VolumeSlider {
          * @private
          * @type {HTMLButtonElement}
          */
-        this.volumeButton = document.querySelector(".volume_button");
+        this.volumeButton = videoPlayer.videoContainer.querySelector(".volume_button");
 
         this.eventPointerMove = this.windowMove.bind(this);
         this.eventPointerUp = this.windowUp.bind(this);
@@ -65,11 +65,6 @@ export class VolumeSlider {
             this.calculateAndSetPercentPosition(e);
             window.addEventListener("mousemove", this.eventPointerMove);
             window.addEventListener("mouseup", this.eventPointerUp);
-        });
-
-        this.volumeButton.addEventListener("click", () => {
-            this.volumeButton.classList.toggle("muted");
-            this.videoPlayer.toggleMute();
         });
     }
 
@@ -114,9 +109,12 @@ export class VolumeSlider {
         this.setThumbPosition(this.percentPosition);
 
         this.progressDone.style.width = `${this.percentPosition}%`;
+        this.videoPlayer.saveVideoPlayerPreference();
 
-        //ce qui est passé en paramètre est le currentTime
-        // this.videoPlayer.setVideoCurrentTime(this.videoPlayer.getVideoDuration() * (this.percentPosition/100));
+    }
+
+    getVolume(){
+        return this.percentPosition;
     }
 
     /**

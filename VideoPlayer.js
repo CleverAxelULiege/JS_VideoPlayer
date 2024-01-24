@@ -21,9 +21,8 @@ export class VideoPlayer {
      * @param {HTMLDivElement} videoContainer
      */
     constructor(videoContainer) {
-        
+
         /**
-         * @private
          * @type {HTMLDivElement}
          */
         this.videoContainer = videoContainer;
@@ -60,6 +59,12 @@ export class VideoPlayer {
 
         /**
          * @private
+         * @type {HTMLButtonElement}
+         */
+        this.volumeButton = this.videoContainer.querySelector(".volume_button");
+
+        /**
+         * @private
          * @type {ProgressionSlider}
          */
         this.progressionSlider = new ProgressionSlider(videoContainer.querySelector(".progress_bar"), this);
@@ -71,12 +76,8 @@ export class VideoPlayer {
          */
         this.volumeSlider = new VolumeSlider(videoContainer.querySelector(".progress_volume"), this);
 
-        if (this.isTouchScreen()) {
-            this.volumeSlider.setThumbPosition(100);
-        } else {
-            this.volumeSlider.setThumbPosition(this.getVolume() * 100);
-        }
 
+        this.retrieveVideoPlayerPreference();
         this.initEventListeners();
     }
 
@@ -86,6 +87,7 @@ export class VideoPlayer {
         this.playPauseButton.addEventListener("click", this.playOrResume.bind(this));
         this.video.addEventListener("ended", this.endVideo.bind(this));
         this.requestFullScreenButton.addEventListener("click", this.requestOrExitFullScreen.bind(this));
+        this.volumeButton.addEventListener("click", this.toggleMute.bind(this));
 
         /**Simple function pour set les ARIA */
         this.videoContainer.addEventListener("mouseenter", () => {
@@ -106,7 +108,7 @@ export class VideoPlayer {
             this.updateDisplayTimeStamp();
         });
 
-        if(!CSS.supports("aspect-ratio", "16/9")){
+        if (!CSS.supports("aspect-ratio", "16/9")) {
             console.info("Aspect-ratio support via JS");
             window.addEventListener("resize", () => {
                 this.videoContainer.style.height = (this.videoContainer.getBoundingClientRect().width / 16) * 9;
@@ -122,7 +124,11 @@ export class VideoPlayer {
     /**
      * Peut être également utilisé par ProgressionSlider pour cacher les controls après avoir utilisé le "thumb" 
      * dans la barre du temps UNIQUEMENT POUR LES ECRANS TACTILE */
-    startTimeoutCloseControlsTouchScreen(){
+    startTimeoutCloseControlsTouchScreen() {
+        if (this.isPaused()) {
+            return;
+        }
+
         this.idTimeoutControls = setTimeout(() => {
             this.closeControlsTouchScreen();
         }, TIME_CONTROLS_ARE_UP);
@@ -147,17 +153,17 @@ export class VideoPlayer {
      * @param {Event} e 
      */
     toggleControlsTouchScreen(e) {
-        if(!this.isTouchScreen()){
+        if (!this.isTouchScreen()) {
             return;
         }
 
         clearTimeout(this.idTimeoutControls);
-        
-        if(!this.areControlsUp){
+
+        if (!this.areControlsUp) {
             this.openControlsTouchScreen();
             this.startTimeoutCloseControlsTouchScreen();
-        } 
-        else if(this.areControlsUp && e.target == this.video){
+        }
+        else if (this.areControlsUp && e.target == this.video) {
             this.closeControlsTouchScreen();
         }
     }
@@ -167,7 +173,7 @@ export class VideoPlayer {
      * après un temps d'inactivité le curseur et les controls seront cachés MARCHE UNIQUEMENT SUR DES APPAREILS NON TACTILES
      * @see toggleControlsTouchScreen -> pour voir comment cacher les controls sur les appareils tactiles
      */
-    hideCursorAndControlsAfterInactivity(){
+    hideCursorAndControlsAfterInactivity() {
         if (this.isTouchScreen()) {
             return;
         }
@@ -175,7 +181,7 @@ export class VideoPlayer {
         this.videoContainer.style.cursor = "";
         this.controls.classList.remove("hide");
         this.controls.setAttribute("aria-hidden", "false");
-        
+
         this.idTimeoutControls = setTimeout(() => {
             this.videoContainer.style.cursor = "none";
             this.controls.classList.add("hide");
@@ -192,7 +198,7 @@ export class VideoPlayer {
             this.playPauseButton.querySelector(".pause_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".replay_icon").classList.remove("hidden");
 
-            if(this.isTouchScreen()){
+            if (this.isTouchScreen()) {
                 this.startTimeoutCloseControlsTouchScreen();
             }
         } else {
@@ -212,6 +218,35 @@ export class VideoPlayer {
         } else {
             this.pause();
         }
+    }
+
+    /**@private */
+    retrieveVideoPlayerPreference(){
+        let videoPlayerPreference = JSON.parse(localStorage.getItem("video_player_preference"));
+
+        if(!videoPlayerPreference){
+            this.volumeSlider.setThumbPosition(100);
+            return;
+        }
+        
+        if(videoPlayerPreference.isMuted){
+            this.toggleMute();
+        }
+
+        if (this.isTouchScreen()) {
+            this.volumeSlider.setThumbPosition(100);
+        } else {
+            this.volumeSlider.setThumbPosition(videoPlayerPreference.volume ?? 100);
+        }
+    }
+
+    saveVideoPlayerPreference(){
+        let preference = {
+            isMuted: this.video.muted,
+            volume: this.volumeSlider.getVolume()
+        }
+
+        localStorage.setItem("video_player_preference", JSON.stringify(preference));
     }
 
     /**
@@ -289,7 +324,7 @@ export class VideoPlayer {
     }
 
     /**@private */
-    supportFullscreen(){
+    supportFullscreen() {
         if (this.videoContainer.requestFullscreen) {
             return true;
         } else if (this.videoContainer.mozRequestFullScreen) {
@@ -358,7 +393,9 @@ export class VideoPlayer {
     }
 
     toggleMute() {
+        this.volumeButton.classList.toggle("muted");
         this.video.muted = !this.video.muted;
+        this.saveVideoPlayerPreference();
     }
 
     /**

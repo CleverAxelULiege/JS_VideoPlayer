@@ -63,10 +63,8 @@ export class ProgressionSlider {
     initEventListeners() {
         if(this.videoPlayer.isTouchScreen()){
             this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
-                clearTimeout(this.videoPlayer.idTimeoutControls);
-                if(this.videoPlayer.isTouchScreen()){
-                    this.videoPlayer.startTimeoutCloseControlsTouchScreen();
-                }
+
+                this.hideControlsTouchScreen();
 
                 this.isPointerDown = true;
                 this.wasPaused = this.videoPlayer.isPaused();
@@ -105,6 +103,15 @@ export class ProgressionSlider {
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
         this.progressDone.style.width = `calc(${this.percentPosition}% + ${this.thumbSize / 2}px)`;
         
+    }
+
+    hideControlsTouchScreen(shouldClearTimeout = true){
+        if(shouldClearTimeout)
+            clearTimeout(this.videoPlayer.idTimeoutControls);
+
+        if(this.videoPlayer.isTouchScreen()){
+            this.videoPlayer.startTimeoutCloseControlsTouchScreen();
+        }
     }
     
     /**
@@ -147,10 +154,9 @@ export class ProgressionSlider {
         if (!this.isPointerDown) {
             return;
         }
-        clearTimeout(this.videoPlayer.idTimeoutControls);
-        if(this.videoPlayer.isTouchScreen()){
-            this.videoPlayer.startTimeoutCloseControlsTouchScreen();
-        }
+
+        this.hideControlsTouchScreen();
+
         if(this.videoPlayer.isVideoOver){
             this.videoPlayer.restartVideo();
         }
@@ -168,9 +174,7 @@ export class ProgressionSlider {
             this.videoPlayer.resume(false);
         }
 
-        if(this.videoPlayer.isTouchScreen()){
-            this.videoPlayer.startTimeoutCloseControlsTouchScreen();
-        }
+        this.hideControlsTouchScreen(false);
 
         window.removeEventListener("mousemove", this.eventPointerMove);
         window.removeEventListener("mouseup", this.eventPointerUp);
