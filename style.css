@@ -61,7 +61,8 @@
     animation-name: play_pause_fade_in;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
-    animation-duration: 750ms;
+    animation-duration: 500ms;
+    animation-timing-function: ease-in-out;
 }
 
 .video_container .pulse_play,

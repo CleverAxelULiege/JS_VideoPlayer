@@ -8,12 +8,15 @@ export class VolumeSlider {
     /**
      * @param {HTMLDivElement} rangeSlider 
      * @param {VideoPlayer} videoPlayer
-     * @param {number} volume  
      */
     constructor(rangeSlider, videoPlayer) {
         /**@type {HTMLDivElement} */
         this.rangeSlider = rangeSlider;
         this.buildRangeSlider();
+
+        this.thumbButton = rangeSlider.querySelector(".thumb");
+        this.thumbSize = this.thumbButton.getBoundingClientRect().width; 
+        this.thumbSize = 10;
 
         /**
          * @private
@@ -28,7 +31,7 @@ export class VolumeSlider {
          */
         this.thumbButton = rangeSlider.querySelector(".thumb");
         // this.thumbSize = this.thumbButton.getBoundingClientRect().width;
-        this.thumbSize = 10;
+        
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
 
         /**@type {HTMLDivElement} */
