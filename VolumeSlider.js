@@ -70,7 +70,6 @@ export class VolumeSlider {
 
     /**
      * @param {number} percent
-     * peut être aussi appelé par le vidéo player (timeUpdate) pour calculer la progression
      */
     setThumbPosition(percent) {
         this.percentPosition = percent;

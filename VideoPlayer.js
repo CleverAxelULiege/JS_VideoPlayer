@@ -19,9 +19,6 @@ export class VideoPlayer {
     /**@private */
     areControlsUp = false;
 
-    /**@private */
-    didControlsJustShowedUp = false;
-
     idTimeoutControls = null;
 
     /**
@@ -100,9 +97,9 @@ export class VideoPlayer {
     /**@private */
     initEventListeners() {
         this.video.addEventListener("timeupdate", this.timeUpdate.bind(this));
-        this.playPauseButton.addEventListener("click", this.playOrResume.bind(this));
+        this.playPauseButton.addEventListener("click", this.playOrPause.bind(this));
         this.video.addEventListener("ended", this.endVideo.bind(this));
-        this.requestFullScreenButton.addEventListener("click", this.requestOrExitFullScreen.bind(this));
+        this.requestFullScreenButton.addEventListener("click", this.toggleFullScreen.bind(this));
         this.volumeButton.addEventListener("click", this.toggleMute.bind(this));
 
         /**Simple function pour set les ARIA */
@@ -119,7 +116,7 @@ export class VideoPlayer {
 
         this.videoContainer.addEventListener("mousemove", this.hideCursorAndControlsAfterInactivity.bind(this));
         this.videoContainer.addEventListener("click", this.toggleControlsTouchScreen.bind(this));
-        this.videoContainer.addEventListener("click", this.playOrResumeViaScreen.bind(this));
+        this.videoContainer.addEventListener("click", this.playOrPauseViaScreen.bind(this));
 
         this.video.addEventListener("loadedmetadata", () => {
             this.updateDisplayTimeStamp();
@@ -135,14 +132,15 @@ export class VideoPlayer {
     }
 
     /**
-     * Peut être également utilisé par ProgressionSlider pour cacher les controls après avoir utilisé le "thumb" 
-     * dans la barre du temps UNIQUEMENT POUR LES ECRANS TACTILE */
+     * Peut être également utilisé par ProgressionSlider pour cacher les controls après avoir utilisé le "thumb" pour se déplacer dans la barre du temps
+     * UNIQUEMENT POUR LES ECRANS TACTILE */
     startTimeoutCloseControlsTouchScreen() {
+        //si la vidéo est en pause ne ferme pas automatiquement les controls
         if (this.isPaused()) {
             return;
         }
-
         this.idTimeoutControls = setTimeout(() => {
+
             this.closeControlsTouchScreen();
         }, TIME_CONTROLS_ARE_UP);
     }
@@ -152,7 +150,6 @@ export class VideoPlayer {
         this.controls.classList.add("active");
         this.controls.setAttribute("aria-hidden", "false");
         this.areControlsUp = true;
-        this.didControlsJustShowedUp = true;
     }
 
     /**@private */
@@ -160,7 +157,6 @@ export class VideoPlayer {
         this.controls.classList.remove("active");
         this.controls.setAttribute("aria-hidden", "true");
         this.areControlsUp = false;
-        this.didControlsJustShowedUp = false;
     }
 
     /**
@@ -186,8 +182,9 @@ export class VideoPlayer {
     /**
      * @private
      * @param {Event} e 
+     * Uniquement sur appareil non tactile, si on clique directement sur la vidéo cela la mettra en pause ou reprendra la lecture
      */
-    playOrResumeViaScreen(e) {
+    playOrPauseViaScreen(e) {
         if (e.target != this.video || this.isTouchScreen()) {
             return;
         }
@@ -210,7 +207,7 @@ export class VideoPlayer {
                 pulsePause.classList.remove("animate");
             }, { once: true });
         }
-        this.playOrResume();
+        this.playOrPause();
 
     }
 
@@ -243,17 +240,13 @@ export class VideoPlayer {
             this.playPauseButton.querySelector(".play_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".pause_icon").classList.add("hidden");
             this.playPauseButton.querySelector(".replay_icon").classList.remove("hidden");
-
-            if (this.isTouchScreen()) {
-                this.startTimeoutCloseControlsTouchScreen();
-            }
         } else {
             console.info("waiting for more data;");
         }
     }
 
     /**@private */
-    playOrResume() {
+    playOrPause() {
         if (this.isVideoOver) {
             this.restartVideo();
             return;
@@ -302,6 +295,7 @@ export class VideoPlayer {
     JSsupportAspectRatio() {
         if (!CSS.supports("aspect-ratio", "16/9")) {
             console.info("Aspect-ratio support via JS");
+            this.videoContainer.style.height = (this.videoContainer.getBoundingClientRect().width / 16) * 9;
             window.addEventListener("resize", () => {
                 this.videoContainer.style.height = (this.videoContainer.getBoundingClientRect().width / 16) * 9;
             });
@@ -309,7 +303,7 @@ export class VideoPlayer {
     }
 
     /**
-     * peut-être aussi utilisé par ProgressionSlider au cas où remonterait la ligne du temps alors que la vidéo est finie
+     * peut-être aussi utilisé par ProgressionSlider au cas où remonterait la ligne du temps alors que la vidéo est finie à partir du "thumb"
      */
     restartVideo() {
         this.isVideoOver = false;
@@ -319,20 +313,29 @@ export class VideoPlayer {
         this.playPauseButton.querySelector(".replay_icon").classList.add("hidden");
     }
 
-    /**@private */
+    /**
+     * @private 
+     * Si je suis en train de toucher à la ligne du temps mets juste à jour le timestamp
+     * Sinon mets à jour le timestamp ainsi que le "thumb" dans la ligne du temps
+     */
     timeUpdate() {
         this.updateDisplayTimeStamp();
         if (this.progressionSlider.isPointerDown) {
             return;
         }
+
         if (this.video.buffered.length != 0) {
             this.progressionSlider.setBufferedLength((this.video.buffered.end(0) / this.getDuration()) * 100);
         }
+
         this.progressionSlider.setThumbPosition((this.getCurrentTime() / this.getDuration()) * 100);
 
     }
 
-    /**@private */
+    /**
+     * @private 
+     * Affiche la durée de la vidéo ainsi que le temps écoulé à côté du volume
+     */
     updateDisplayTimeStamp() {
         try {
             this.timestamp.innerHTML = `${this.formatTime(Math.round(this.getCurrentTime()))} / ${this.formatTime(Math.round(this.getDuration()))}`;
@@ -353,7 +356,7 @@ export class VideoPlayer {
     }
 
     /**@private */
-    requestOrExitFullScreen() {
+    toggleFullScreen() {
         if (!document.fullscreenElement && !document.mozFullScreen && !document.webkitIsFullScreen && !document.msFullscreenElement) {
             if (this.videoContainer.requestFullscreen) {
                 this.videoContainer.requestFullscreen();
@@ -364,11 +367,6 @@ export class VideoPlayer {
             } else if (this.videoContainer.msRequestFullscreen) {
                 this.videoContainer.msRequestFullscreen();
             }
-
-            if (this.isTouchScreen()) {
-                this.toggleControlsTouchScreen();
-            }
-
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -380,6 +378,11 @@ export class VideoPlayer {
                 document.msExitFullscreen();
             }
         }
+
+        //tous les requestFullScreen ne peuvent pas renvoyer une promesse, donc on va essayer de "race"
+        setTimeout(() => {
+            this.ifTouchScreenStartTimeout();
+        });
     }
 
     /**@private */
@@ -406,11 +409,14 @@ export class VideoPlayer {
     }
 
     resume(shouldToggleIcons = true) {
-        this.video.play();
-
-        if (shouldToggleIcons) {
-            this.togglePlayPauseIcons();
-        }
+        this.video.play()
+            .then(() => {
+                if (shouldToggleIcons) {
+                    this.togglePlayPauseIcons();
+                }
+                //si la vidéo joue cache les controls
+                this.ifTouchScreenStartTimeout();
+            });
 
     }
 
@@ -472,6 +478,14 @@ export class VideoPlayer {
     }
 
     /**@private */
+    ifTouchScreenStartTimeout() {
+        if (this.isTouchScreen()) {
+            clearTimeout(this.idTimeoutControls);
+            this.startTimeoutCloseControlsTouchScreen();
+        }
+    }
+
+    /**@private */
     buildVideoPlayer() {
         // console.warn("not building the player");
         // return;
@@ -479,7 +493,7 @@ export class VideoPlayer {
         let pulseContainer = document.createElement("div");
         pulseContainer.classList.add("pulse_container");
         pulseContainer.innerHTML =
-        `
+            `
         <div class="pulse_play hidden">
             <svg width="75" class="play_icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>
         </div>
