@@ -27,7 +27,13 @@ export class ProgressionSlider {
 
         /**@type {HTMLButtonElement} */
         this.thumbButton = rangeSlider.querySelector(".thumb");
-        this.thumbSize = this.thumbButton.getBoundingClientRect().width; 
+        this.thumbSize = this.thumbButton.getBoundingClientRect().width;
+
+        if(this.thumbSize == 0){
+            console.warn("Thumb size to 0, will set to 20 by default");
+            this.thumbSize = 20;
+        }
+
         this.thumbButton.style.left = `calc(${this.percentPosition}% - ${this.thumbSize / 2}px)`;
 
         /**@type {HTMLDivElement} */
@@ -63,8 +69,7 @@ export class ProgressionSlider {
     initEventListeners() {
         if(this.videoPlayer.isTouchScreen()){
             this.rangeSlider.querySelector(".custom_range_slider").addEventListener("touchstart", (e) => {
-
-                this.hideControlsTouchScreen();
+                clearInterval(this.videoPlayer.idTimeoutControls);
 
                 this.isPointerDown = true;
                 this.wasPaused = this.videoPlayer.isPaused();
@@ -155,7 +160,7 @@ export class ProgressionSlider {
             return;
         }
 
-        this.hideControlsTouchScreen();
+        clearInterval(this.videoPlayer.idTimeoutControls);
 
         if(this.videoPlayer.isVideoOver){
             this.videoPlayer.restartVideo();
@@ -174,7 +179,11 @@ export class ProgressionSlider {
             this.videoPlayer.resume(false);
         }
 
-        this.hideControlsTouchScreen(false);
+
+        //alors je ne sais pas pourquoi mais ça a besoin d'un délai
+        setTimeout(() => {
+            this.hideControlsTouchScreen();
+        }, 10);
 
         window.removeEventListener("mousemove", this.eventPointerMove);
         window.removeEventListener("mouseup", this.eventPointerUp);

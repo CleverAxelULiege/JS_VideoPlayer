@@ -16,7 +16,11 @@ export class VolumeSlider {
 
         this.thumbButton = rangeSlider.querySelector(".thumb");
         this.thumbSize = this.thumbButton.getBoundingClientRect().width; 
-        this.thumbSize = 10;
+
+        if(this.thumbSize == 0){
+            console.warn("Thumb size to 0, will set to 10 by default");
+            this.thumbSize = 10;
+        }
 
         /**
          * @private
