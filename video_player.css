@@ -10,7 +10,7 @@
     display: none;
 }
 
-.video_container {
+.video_player {
     margin: 30px;
     position: relative;
     max-width: 854px;
@@ -19,17 +19,17 @@
 }
 
 @supports (aspect-ratio: 16/9){
-    .video_container{
+    .video_player{
         aspect-ratio: 16/9;
     }
 }
 
-.video_container video {
+.video_player video {
     width: 100%;
     height: 100%;
 }
 
-.video_container .controls {
+.video_player .controls {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -42,7 +42,7 @@
     background: linear-gradient(0deg, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 100%);
 }
 
-.video_container .pulse_container{
+.video_player .pulse_container{
     position: absolute;
     pointer-events: none;
     top: 0;
@@ -51,13 +51,13 @@
     height: 100%;
 }
 
-.video_container .pulse_play.hidden,
-.video_container .pulse_pause.hidden{
+.video_player .pulse_play.hidden,
+.video_player .pulse_pause.hidden{
     display: none;
 }
 
-.video_container .pulse_play.animate,
-.video_container .pulse_pause.animate{
+.video_player .pulse_play.animate,
+.video_player .pulse_pause.animate{
     animation-name: play_pause_fade_in;
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
@@ -65,8 +65,8 @@
     animation-timing-function: ease-in-out;
 }
 
-.video_container .pulse_play,
-.video_container .pulse_pause{
+.video_player .pulse_play,
+.video_player .pulse_pause{
     position: absolute;
     display: flex;
     justify-content: center;
@@ -81,25 +81,25 @@
     transform: translate(-50%, -50%) scale(0.5);
 }
 
-.video_container .controls.active{
+.video_player .controls.active{
     opacity: 1;
     pointer-events: all;
 }
 
 @media (hover: hover) {
-    .video_container:hover .controls {
+    .video_player:hover .controls {
         opacity: 1;
         pointer-events: all;
     }
 
-    .video_container .controls.hide{
+    .video_player .controls.hide{
         opacity: 0;
         pointer-events: none;
         cursor: none;
     }
 }
 
-.video_container .controls .buttons_container {
+.video_player .controls .buttons_container {
     margin-top: auto;
     position: absolute;
     display: flex;
@@ -109,7 +109,7 @@
     bottom: 10px;
 }
 
-.video_container .controls .buttons_container button {
+.video_player .controls .buttons_container button {
     position: relative;
     width: 44px;
     height: 44px;
@@ -124,7 +124,7 @@
     background-color: transparent;
 }
 
-.video_container .controls .buttons_container .timestamp {
+.video_player .controls .buttons_container .timestamp {
     color: white;
     padding: 0 5px;
     font-size: 16px;
@@ -133,11 +133,11 @@
     -moz-user-select: none;
 }
 
-.video_container .controls .buttons_container button.play_button {
+.video_player .controls .buttons_container button.play_button {
     margin-right: 5px;
 }
 
-.video_container .controls .buttons_container button.volume_button.muted::after {
+.video_player .controls .buttons_container button.volume_button.muted::after {
     position: absolute;
     content: "";
     height: 100%;
@@ -148,26 +148,26 @@
     background-color: #c72323;
 }
 
-.video_container .controls .buttons_container .full_screen_button {
+.video_player .controls .buttons_container .full_screen_button {
     margin-left: auto;
     margin-right: 15px;
 }
 
 /****************BARRE DE PROGRESSION DANS LE TEMPS***************************/
 
-.video_container .controls .progress_bar .custom_range_slider {
+.video_player .controls .progress_bar .custom_range_slider {
     position: relative;
     width: 100%;
     height: 10px;
 }
 
-.video_container .controls .progress_bar .rail {
+.video_player .controls .progress_bar .rail {
     height: 100%;
     background-color: #c2c1c1;
     cursor: pointer;
 }
 
-.video_container .controls .progress_bar .thumb {
+.video_player .controls .progress_bar .thumb {
     cursor: pointer;
     border: none;
     outline: none;
@@ -182,11 +182,11 @@
     transform: translateY(-50%);
 }
 
-.video_container .controls .progress_bar {
+.video_player .controls .progress_bar {
     padding: 0 16px 0 16px;
 }
 
-.video_container .controls .progress_bar .done {
+.video_player .controls .progress_bar .done {
     pointer-events: none;
     position: absolute;
     left: 0;
@@ -197,7 +197,7 @@
     z-index: 50;
 }
 
-.video_container .controls .progress_bar .buffered {
+.video_player .controls .progress_bar .buffered {
     pointer-events: none;
     position: absolute;
     left: 0;
@@ -212,20 +212,20 @@
 
 
 /*****************BARRE DE PROGRESSION DU VOLUME**************************/
-.video_container .controls .volume_container .custom_range_slider {
+.video_player .controls .volume_container .custom_range_slider {
     position: relative;
     width: 100%;
     height: 7px;
 }
 
-.video_container .controls .volume_container .rail {
+.video_player .controls .volume_container .rail {
     height: 100%;
     background-color: rgb(194, 193, 193);
     cursor: pointer;
     border-radius: 5px;
 }
 
-.video_container .controls .volume_container .thumb {
+.video_player .controls .volume_container .thumb {
     display: none;
     cursor: pointer;
     border: none;
@@ -241,7 +241,7 @@
     transform: translateY(-50%);
 }
 
-.video_container .controls .volume_container .done {
+.video_player .controls .volume_container .done {
     pointer-events: none;
     position: absolute;
     left: 0;
@@ -253,7 +253,7 @@
     z-index: 50;
 }
 
-.video_container .controls .volume_container {
+.video_player .controls .volume_container {
     align-self: stretch;
     width: 0;
     display: flex;
@@ -262,21 +262,21 @@
     transition: all 150ms ease-in-out;
 }
 
-.video_container .controls .progress_volume {
+.video_player .controls .progress_volume {
     width: 100%;
 }
 
 
 @media (hover: hover) {
-    .video_container .controls .volume_button:hover+.volume_container,
-    .video_container .controls .volume_container:hover {
+    .video_player .controls .volume_button:hover+.volume_container,
+    .video_player .controls .volume_container:hover {
         padding: 0 10px 0 10px;
 
         width: 90px;
     }
 
-    .video_container .controls .volume_button:hover+.volume_container .thumb,
-    .video_container .controls .volume_container:hover .thumb {
+    .video_player .controls .volume_button:hover+.volume_container .thumb,
+    .video_player .controls .volume_container:hover .thumb {
         display: block;
     }
 }

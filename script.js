@@ -4,7 +4,7 @@ import { VideoPlayer } from "./VideoPlayer.js";
 const VIDEO = document.querySelector("video");
 const VIDEO_DURATION = VIDEO.duration;
 
-let videoPlayer = new VideoPlayer(document.querySelector(".video_container"));
+let videoPlayer = new VideoPlayer(document.querySelector(".video_player"));
 
 // console.log(VIDEO.buffered);
 // console.log(VIDEO.buffered.end(0)); //will failed if video.buffered.length == 0
